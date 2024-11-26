@@ -9,8 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -18,6 +19,8 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /var/www/html
-            sudo git pull origin main
+            # Descargar el archivo HTML desde GitHub
+            curl -o /var/www/html/hola.html https://raw.githubusercontent.com/Loony213/PaginaYaml/main/hola.html
+
+            # Reiniciar Apache para aplicar los cambios
             sudo systemctl restart httpd
