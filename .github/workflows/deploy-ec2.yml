@@ -14,22 +14,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Configuración de AWS CLI
+      # Configuración de AWS CLI con credenciales "hardcoded"
       - name: Configure AWS CLI
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region us-east-1
 
       # Lanza la instancia EC2 y despliega el código
-      - name: Deploy EC2 instance
+      - name: Launch EC2 instance and deploy code
         run: |
           # Variables
           AMI_ID="ami-0c02fb55956c7d316" # Amazon Linux 2 en us-east-1
           INSTANCE_TYPE="t2.micro"
-          KEY_NAME="TuNombreDeClave" # Reemplaza con tu clave SSH
-          SECURITY_GROUP="MyWebServerSG"
+          KEY_NAME="MiClave"  # Reemplaza con el nombre de tu clave SSH
+          SECURITY_GROUP="default"
           
           # Crear un grupo de seguridad
           SG_ID=$(aws ec2 create-security-group --group-name $SECURITY_GROUP --description "Security group for web server" --query 'GroupId' --output text)
@@ -45,15 +44,14 @@ jobs:
           # Obtén la IP pública de la instancia
           PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
 
-          # Instala Git, Apache y clona el repositorio en la instancia
-          aws ec2-instance-connect send-ssh-public-key --instance-id $INSTANCE_ID --availability-zone $(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[0].Instances[0].Placement.AvailabilityZone' --output text) --instance-os-user ec2-user --ssh-public-key file://~/.ssh/id_rsa.pub
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@$PUBLIC_IP << EOF
+          # Conéctate por SSH y despliega el código
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/MiClaveEC2.pem ec2-user@$PUBLIC_IP << EOF
             sudo yum update -y
             sudo yum install -y git httpd
             sudo systemctl start httpd
             sudo systemctl enable httpd
             cd /var/www/html
-            git clone https://github.com/${{ github.repository }} .
+            git clone https://github.com/Loony213/PaginaYaml .
           EOF
 
           echo "Application deployed at http://$PUBLIC_IP"
