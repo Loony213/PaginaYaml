@@ -19,6 +19,9 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Limpia el contenido actual del directorio HTML
+            sudo rm -rf /var/www/html/*
+            
             # Descargar el archivo HTML desde GitHub
             curl -o /var/www/html/hola.html https://raw.githubusercontent.com/Loony213/PaginaYaml/main/hola.html
 
