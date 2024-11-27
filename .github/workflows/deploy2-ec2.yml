@@ -17,7 +17,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST2 }}
           username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets.EC2_SSH_KEY2 }}
           script: |
             # Descargar el archivo HTML desde GitHub
             curl -o /var/www/html/hola.html https://raw.githubusercontent.com/Loony213/PaginaYaml/main/hola.html
