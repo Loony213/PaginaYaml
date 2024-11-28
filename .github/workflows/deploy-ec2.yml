@@ -22,12 +22,17 @@ jobs:
             # Limpia el contenido actual del directorio HTML con privilegios de sudo
             sudo rm -rf /var/www/html/*
 
-            # Descargar el archivo HTML desde GitHub con privilegios de sudo
-            curl -o /tmp/hola.html https://raw.githubusercontent.com/Loony213/PaginaYaml/main/hola.html
-            sudo mv /tmp/hola.html /var/www/html/hola.html
+            # Clona el repositorio desde la rama específica (QA)
+            git clone --branch main https://github.com/Loony213/PaginaYaml.git /tmp/PaginaYaml
+
+            # Mueve los archivos necesarios al directorio HTML
+            sudo mv /tmp/PaginaYaml/hola.html /var/www/html/hola.html
 
             # Cambia los permisos para que Apache pueda acceder al archivo
             sudo chmod 644 /var/www/html/hola.html
 
             # Reiniciar Apache para aplicar los cambios
             sudo systemctl restart httpd
+
+            # Limpia los archivos temporales
+            rm -rf /tmp/PaginaYaml
