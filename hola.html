@@ -6,6 +6,19 @@
     <title>Hola Mundo</title>
 </head>
 <body>
-    <h1>Hola Mundo balanceador desde $(hostname -f)</h1>
+    <h1>Hola Mundo balanceador desde <span id="hostname">Cargando...</span></h1>
+
+    <script>
+        // Realiza una petición al archivo PHP
+        fetch('get-hostname.php')
+            .then(response => response.text())
+            .then(data => {
+                // Inserta el nombre del host en el lugar adecuado
+                document.getElementById('hostname').textContent = data;
+            })
+            .catch(error => {
+                console.error('Error al obtener el hostname:', error);
+            });
+    </script>
 </body>
 </html>

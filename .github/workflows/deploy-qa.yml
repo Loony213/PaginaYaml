@@ -1,0 +1,39 @@
+name: Deploy to QA
+
+on:
+  push:
+    branches:
+      - QA
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Deploy to QA
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.EC2_QA }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+      script: |
+         # Limpia el contenido actual del directorio HTML con privilegios de sudo
+         sudo rm -rf /var/www/html/*
+
+         # Clona el repositorio desde la rama específica (QA)
+         git clone --branch QA https://github.com/Loony213/PaginaYaml.git /tmp/PaginaYaml
+
+         # Mueve los archivos necesarios al directorio HTML
+         sudo mv /tmp/PaginaYaml/hola.html /var/www/html/hola.html
+
+         # Cambia los permisos para que Apache pueda acceder al archivo
+         sudo chmod 644 /var/www/html/hola.html
+
+         # Reiniciar Apache para aplicar los cambios
+         sudo systemctl restart httpd
+
+         # Limpia los archivos temporales
+         rm -rf /tmp/PaginaYaml
+
